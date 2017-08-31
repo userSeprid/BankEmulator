@@ -2,29 +2,24 @@ package com.bank.logic.controller.auxiliary;
 
 import com.bank.logic.model.Person;
 import com.bank.logic.service.HibernateService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.InputMismatchException;
-import java.util.Scanner;
 
 
 public class AccountSectionImpl implements AccountSection {
     private HibernateService service;
     private Person currentUser;
-    private final Logger logger;
-    private Scanner scan;
+    private ScannerStub scannerStub;
+    private boolean flag = false;
+    private int userSubsectionChoose;
 
     public AccountSectionImpl() {
-        logger = LoggerFactory.getLogger(AccountSectionImpl.class);
+        userSubsectionChoose = 0;
     }
 
+    @Override
+    public void init(HibernateService service, Person _currentUser, ScannerStub scan) {
 
-    public void init(HibernateService service, Person currentUser) {
-
-        logger.debug("AccountSection start.");
         this.service = service;
-        this.currentUser = currentUser;
+        this.currentUser = _currentUser;
 
         System.out.println("You're in your account menu. \n" +
                 "Here you can update account information. \n" +
@@ -32,78 +27,98 @@ public class AccountSectionImpl implements AccountSection {
                 "1 - Change your email. \n2 - Change your password. \n" +
                 "3 - Show account info \n4 - Exit from this section. \n");
 
-        scan = new Scanner(System.in);
-        boolean flag = false;
+        this.scannerStub = scan;
+        flag = false;
 
+        while (!flag) {
 
-        while (!flag)
-        {
-            Integer choice = null;
+            currentUser = service.getPersonById(currentUser.getId());
+            String userAnswer = userAnswerTaker(scannerStub, currentUser);
+            if (!userAnswer.isEmpty()) {
 
-            System.out.println("(Account Section) Choose an operation.");
-
-            try {
-                choice = scan.nextInt();
-            }catch (InputMismatchException ex) {
-                logger.debug("User - {}, ID - {}, try to input ", currentUser.getPersonName(), currentUser.getId(), choice);
-                System.out.println("Incorrect input");
+                if ((userSubsectionChoose == 1 || userSubsectionChoose == 2 || userSubsectionChoose == 3) && !userAnswer.equals("no")) {
+                    switch (userSubsectionChoose) {
+                        case 1:
+                            service.updatePersonEmail(currentUser.getId(), userAnswer);
+                        case 2:
+                            service.updatePersonPassword(currentUser.getId(), userAnswer);
+                        case 3:
+                            System.out.printf("ID - %s \nName - %s \nEmail - %s \nPassword - %s \n",
+                                    currentUser.getId(), currentUser.getPersonName(), currentUser.getPersonEmail(), currentUser.getPersonPassword());
+                    }
+                } else if (userAnswer.equals("exit")) flag = true;
             }
-
-            switch (choice)
-            {
-                case 1:
-                    logger.debug("User - {}, ID - {}, try to change email",currentUser.getPersonName(), currentUser.getId());
-                    System.out.printf("Your current email is %s . Please input your new email (If you change your mind input \"no\" " +
-                                    "with the same case and without additional spacing.)", currentUser.getPersonEmail());
-
-                    String newEmail = scan.next();
-                    if (newEmail.equals("no")) {
-                        System.out.println("exit to account section.");
-                        logger.debug("User - {}, ID - {} cancel email changing.", currentUser.getPersonName(), currentUser.getId());
-                    }
-                    else {
-                        service.updatePersonEmail(currentUser.getId(), newEmail);
-                        logger.debug("User - {}, ID - {} was successfully changed email. New email is - {}", currentUser.getPersonName(),
-                                currentUser.getId(), newEmail);
-                        System.out.printf("Your email changed. Your new email is %s \n", newEmail);
-                    }
-                    break;
-                case 2:
-                    logger.debug("User - {}, ID - {}, try to change password",currentUser.getPersonName(), currentUser.getId());
-                    System.out.printf("Your current password is %s . Please input your new password (If you change your mind input \"no\" " +
-                            "with the same case and without additional spacing.)", currentUser.getPersonPassword());
-
-                    String newPassword = scan.next();
-                    if (newPassword.equals("no")) {
-                        System.out.println("exit to account section.");
-                        logger.debug("User - {}, ID - {} cancel password changing.", currentUser.getPersonName(), currentUser.getId());
-                    }
-                    else {
-                        service.updatePersonPassword(currentUser.getId(), newPassword);
-                        logger.debug("User - {}, ID - {} was successfully changed password. New password is - {}", currentUser.getPersonName(),
-                               currentUser.getId(), newPassword);
-                        System.out.printf("Your password changed. Your new password is %s", newPassword);
-                    }
-                    break;
-                case 3:
-                    logger.debug("User - {}, ID - {}, check his account info",currentUser.getPersonName(), currentUser.getId());
-                    System.out.printf("ID - %s \nName - %s \nEmail - %s \nPassword - %s \n",
-                            currentUser.getId(), currentUser.getPersonName(), currentUser.getPersonEmail(), currentUser.getPersonPassword());
-                    break;
-                case 4:
-                    logger.debug("User - {}, ID - {}, exit from account section.",currentUser.getPersonName(), currentUser.getId());
-                    flag = true;
-                    break;
-
-            }
-
         }
-
-
-
+        userSubsectionChoose = 0;
     }
 
 
+    //These method use my stub for java.util.Scanner for reading input from  console.
 
-    public void auxiliaryFunctional() {}
+    /**
+     * Take a several inputs from console that connected with account data changing section
+     *
+     * @param scan it is stub of java.util.Scanner for reading input from console
+     * @param user it's a instance of Person object that contain info about current user
+     * @return a String that contain user chosen operation
+     */
+    @Override
+    public String userAnswerTaker(ScannerStub scan, Person user) {
+        //Choosing one of 4 possible subsection
+        int subsection = inputCheck(scan);
+        String userAnswer = null;
+        switch (subsection) {
+            //Email changing subsection
+            case 1:
+                userSubsectionChoose = 1;
+                System.out.printf("Your current email is %s . Please input your new email (If you change your mind input " +
+                        "\"no\" with the same case and without additional spacing.)\n", user.getPersonEmail());
+
+                //If user input "no" email won't change else this input will be new email
+                userAnswer = scannerStub.next();
+                if (userAnswer.equals("no")) {
+                    System.out.println("exit to account section.\n");
+                    return "no";
+                }
+                return userAnswer;
+            //Password changing section
+            case 2:
+                userSubsectionChoose = 2;
+                System.out.printf("Your current password is %s . Please input your new password (If you change your mind input " +
+                        "\"no\" with the same case and without additional spacing.)\n", user.getPersonPassword());
+
+                //If user input "no" password won't change else this input will be new password
+                userAnswer = scannerStub.next();
+                if (userAnswer.equals("no")) {
+                    System.out.println("exit to account section.\n");
+                    return "no";
+                }
+                return userAnswer;
+
+            //Account information subsection. This section show all account info on console
+            case 3:
+                userSubsectionChoose = 3;
+                return "3";
+
+            //Exit subsection. If user choose this subsection, he will be returned to program main section
+            case 4:
+                userSubsectionChoose = 4;
+                System.out.println("exit to account section.\n");
+                return "exit";
+        }
+        //If input was incorrect method return "null" and user receive a "error" message that show him right input
+        return null;
+    }
+
+    private int inputCheck(ScannerStub scan) {
+        Integer amount = 0;
+        try {
+            amount = Integer.parseInt(scan.next());
+        } catch (NumberFormatException ex) {
+            System.out.println("Incorrect input\n");
+        }
+        if (amount < 0) amount = 0;
+        return amount;
+    }
+
 }

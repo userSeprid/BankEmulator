@@ -17,10 +17,13 @@
 
     <bean id="language" class="com.bank.logic.controller.auxiliary.LanguageSectionImpl"/>
 
+    <bean id="scanner" class="com.bank.logic.controller.auxiliary.ScannerStubImpl"/>
+
     <bean id="controller" class="com.bank.logic.controller.MainLogicImpl">
         <constructor-arg index="0" ref="account"/>
         <constructor-arg index="1" ref="balance"/>
         <constructor-arg index="2" ref="language"/>
+        <constructor-arg index="3" ref="scanner"/>
     </bean>
 
 </beans>

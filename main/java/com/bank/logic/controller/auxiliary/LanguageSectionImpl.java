@@ -14,13 +14,6 @@ public class LanguageSectionImpl implements LanguageSection{
 
     public void init() {
 
-        logger.debug("LanguageSection start.");
-
-
-
     }
 
-    public void auxiliaryFunctional() {
-
-    }
 }

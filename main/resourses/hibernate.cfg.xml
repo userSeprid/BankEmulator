@@ -6,9 +6,9 @@
     <session-factory>
 
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost:3306/dev</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/userSchema</property>
         <property name="connection.username">Seprid</property>
-        <property name="connection.password">seprid</property>
+        <property name="connection.password">picesc150497</property>
 
         <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
 

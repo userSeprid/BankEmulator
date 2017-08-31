@@ -38,6 +38,16 @@ public class Person {
         personBalance = 0;
     }
 
+    public Person(String personName, String personEmail, String personPassword, Integer id)
+    {
+        this.personName = personName;
+        this.personEmail = personEmail;
+        this.personPassword = personPassword;
+        personBalance = 0;
+        this.id = id;
+
+    }
+
     public Integer getId() {
         return id;
     }

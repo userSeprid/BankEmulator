@@ -7,29 +7,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.InputMismatchException;
-import java.util.Scanner;
 
 
 public class MainLogicImpl implements MainLogic{
     private HibernateService service;
     private final Logger logger;
-    private Scanner scan;
+    private ScannerStub scan;
     private AccountSection accountSection;
     private BalanceSection balanceSection;
     private LanguageSection languageSection;
 
-    public MainLogicImpl(AccountSection accountSection, BalanceSection balanceSection, LanguageSection languageSection)
+    public MainLogicImpl(AccountSection accountSection, BalanceSection balanceSection, LanguageSection languageSection,
+                         ScannerStub scannerStub)
     {
         logger = LoggerFactory.getLogger(MainLogicImpl.class);
         this.accountSection = accountSection;
         this.balanceSection = balanceSection;
         this.languageSection = languageSection;
+        scan = scannerStub;
     }
 
     public void initLogic(HibernateService service){
         this.service = service;
         logger.debug("Logic initialized.");
-        scan = new Scanner(System.in);
     }
 
     public Person authentication(){
@@ -121,12 +121,12 @@ public class MainLogicImpl implements MainLogic{
                 case 2:
                     //Enter in an account section
                     logger.debug("User - {}, ID - {}, enter in an account section",currentUser.getPersonName(), currentUser.getId());
-                    accountSection.init(service, currentUser);
+                    accountSection.init(service, currentUser, scan);
                     break;
                 case 3:
                     //Enter in a balance section
                     logger.debug("User - {}, ID - {}, enter in a balance section",currentUser.getPersonName(), currentUser.getId());
-                    balanceSection.init(service, currentUser);
+                    balanceSection.init(service, currentUser, scan);
                     break;
                 case 4:
                     //Exit from user account

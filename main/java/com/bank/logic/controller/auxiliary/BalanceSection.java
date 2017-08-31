@@ -6,9 +6,9 @@ import com.bank.logic.service.HibernateService;
 
 public interface BalanceSection {
 
-    void init(HibernateService service, Person currentUser);
+    void init(HibernateService service, Person currentUser, ScannerStub scan);
 
-    //This method was created for case when extension requests more that one method.
-    void auxiliaryFunctional();
+    String userAnswerTaker(ScannerStub scan, Person user);
+
 
 }
